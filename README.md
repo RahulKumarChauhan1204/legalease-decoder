@@ -27,3 +27,15 @@ Google Document AI: Utilized for high-accuracy OCR and structured text extractio
 Gemini 1.5 Pro: Leverages a massive context window to perform deep semantic analysis across entire legal documents.
 
 Firebase Storage: Provides secure, scalable storage for uploaded user documents.
+
+🔮 Future Scope
+
+Multi-Language Support: Expanding the decoder to support regional Indian languages (Hindi, Bengali, etc.), making legal clarity accessible to a broader demographic.
+
+Smart "Compare" Feature: Allowing users to upload two versions of a contract (e.g., an original vs. an amended version) to instantly highlight exactly what changed in the legal terms.
+
+Browser Extension: A Chrome/Edge extension that can scan Terms of Service (ToS) pages on websites in real-time before a user clicks "I Agree."
+
+Lawyer-in-the-Loop Integration: A feature to export the AI's findings into a professional brief that can be sent directly to a legal professional for a secondary review.
+
+Regulatory Compliance Mapping: Automatically checking if a contract violates specific local laws or consumer protection acts (like RERA for real estate or labor laws for employment).
