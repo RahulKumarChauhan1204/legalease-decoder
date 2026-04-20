@@ -13,43 +13,55 @@ Transforms complex legal terminology into simple, plain English, making document
 
 Automatically detects and highlights potentially harmful or unfair clauses, including:
 
-Hidden fees
-One-sided termination clauses
-Ambiguous obligations
+.Hidden fees
+.One-sided termination clauses
+.Ambiguous obligations
 📚 Large Context Analysis
 
 Capable of processing and analyzing multi-page documents (50+ pages) while maintaining contextual accuracy across the entire file.
+
 
 🔐 Secure Document Management
 
 Ensures user privacy with secure upload, processing, and storage of sensitive legal documents.
 
+
 🛠️ Tech Stack
+
 Frontend
+
 React / Next.js – Responsive and intuitive user interface
 TypeScript – Strong typing for maintainable and scalable code
+
 Backend
+
 Python – Core processing logic and AI orchestration
 Cloud & AI Infrastructure
 Google Document AI – OCR and structured data extraction from PDFs
 Gemini 1.5 Pro – Advanced large-context semantic analysis
 Firebase Storage – Secure and scalable document storage
+
+
 🔮 Future Scope
 🌐 Multi-Language Support
 
 Expand accessibility by supporting regional Indian languages such as Hindi, Bengali, and more.
 
+
 🔄 Smart Contract Comparison
 
 Enable users to upload and compare different versions of a contract, with automatic highlighting of changes.
+
 
 🌍 Browser Extension
 
 Develop a Chrome/Edge extension to analyze Terms of Service pages in real-time before users accept them.
 
+
 👨‍⚖️ Lawyer-in-the-Loop
 
 Allow users to export AI-generated summaries into professional briefs for legal expert review.
+
 
 📜 Regulatory Compliance Mapping
 
