@@ -1,41 +1,56 @@
-Legal-Ease Decoder
-Empowering individuals by demystifying complex legal jargon through AI.
+📄 Legal-Ease Decoder
 
-Legal documents are often designed to be opaque, filled with "legalese" that can hide predatory terms or unfair clauses. Legal-Ease Decoder is an AI-powered tool that allows users to upload any PDF—from rental agreements to employment contracts—and receive a structured, human-readable breakdown of potential risks, hidden fees, and unfair terms.
+Empowering individuals by demystifying complex legal jargon through AI
+
+Legal-Ease Decoder is an AI-powered application designed to make legal documents understandable for everyone. Legal contracts are often filled with dense, technical language that can obscure critical details, including hidden fees or unfair clauses. This tool allows users to upload documents (such as rental agreements, employment contracts, or terms of service) and receive a clear, structured, and human-readable breakdown of key insights and risks.
 
 🚀 Key Features
-Jargon Decoding: Translates complex legal terminology into plain English.
+🔍 Jargon Decoding
 
-Risk Identification: Automatically flags "predatory" patterns, such as hidden fees or unfair termination clauses.
+Transforms complex legal terminology into simple, plain English, making documents easier to understand for non-experts.
 
-Massive Context Handling: Capable of analyzing multi-page contracts (up to 50+ pages) without losing context.
+⚠️ Risk Identification
 
-Secure Document Management: Ensures user privacy and secure storage for sensitive legal files.
+Automatically detects and highlights potentially harmful or unfair clauses, including:
+
+Hidden fees
+One-sided termination clauses
+Ambiguous obligations
+📚 Large Context Analysis
+
+Capable of processing and analyzing multi-page documents (50+ pages) while maintaining contextual accuracy across the entire file.
+
+🔐 Secure Document Management
+
+Ensures user privacy with secure upload, processing, and storage of sensitive legal documents.
 
 🛠️ Tech Stack
 Frontend
-React / Next.js: Providing a clean, responsive, and intuitive UI/UX for seamless document uploading and result visualization.
-
-TypeScript: Ensuring robust code quality and type safety across the application.
-
+React / Next.js – Responsive and intuitive user interface
+TypeScript – Strong typing for maintainable and scalable code
 Backend
-Python: Handling the core logic, document processing pipelines, and AI integration.
-
-Google Cloud Ecosystem
-Google Document AI: Utilized for high-accuracy OCR and structured text extraction from complex, multi-page PDFs.
-
-Gemini 1.5 Pro: Leverages a massive context window to perform deep semantic analysis across entire legal documents.
-
-Firebase Storage: Provides secure, scalable storage for uploaded user documents.
-
+Python – Core processing logic and AI orchestration
+Cloud & AI Infrastructure
+Google Document AI – OCR and structured data extraction from PDFs
+Gemini 1.5 Pro – Advanced large-context semantic analysis
+Firebase Storage – Secure and scalable document storage
 🔮 Future Scope
+🌐 Multi-Language Support
 
-Multi-Language Support: Expanding the decoder to support regional Indian languages (Hindi, Bengali, etc.), making legal clarity accessible to a broader demographic.
+Expand accessibility by supporting regional Indian languages such as Hindi, Bengali, and more.
 
-Smart "Compare" Feature: Allowing users to upload two versions of a contract (e.g., an original vs. an amended version) to instantly highlight exactly what changed in the legal terms.
+🔄 Smart Contract Comparison
 
-Browser Extension: A Chrome/Edge extension that can scan Terms of Service (ToS) pages on websites in real-time before a user clicks "I Agree."
+Enable users to upload and compare different versions of a contract, with automatic highlighting of changes.
 
-Lawyer-in-the-Loop Integration: A feature to export the AI's findings into a professional brief that can be sent directly to a legal professional for a secondary review.
+🌍 Browser Extension
 
-Regulatory Compliance Mapping: Automatically checking if a contract violates specific local laws or consumer protection acts (like RERA for real estate or labor laws for employment).
+Develop a Chrome/Edge extension to analyze Terms of Service pages in real-time before users accept them.
+
+👨‍⚖️ Lawyer-in-the-Loop
+
+Allow users to export AI-generated summaries into professional briefs for legal expert review.
+
+📜 Regulatory Compliance Mapping
+
+Integrate checks against local laws and regulations (e.g., real estate and labor laws) to identify potential legal violations.
