@@ -1,4 +1,4 @@
-import { GoogleGenAI, Type, Chat, ThinkingLevel } from "@google/genai";
+import { GoogleGenerativeAI, SchemaType } from "@google/generative-ai";
 import { AnalysisResult, ComparisonResult } from "../types";
 
 const ANALYSIS_PROMPT = `
@@ -27,95 +27,132 @@ const COMPARISON_PROMPT = `
   Return ONLY valid JSON matching the ComparisonResult structure.
 `;
 
-export const analyzeLegalDocument = async (base64Data: string, mimeType: string): Promise<AnalysisResult> => {
-  const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
-  
+const getApiKey = () => {
+  // 1. Try Vite-specific env (standard for browser apps)
   try {
-    const response = await ai.models.generateContent({
-      model: "gemini-3.1-pro-preview",
-      contents: {
-        parts: [
-          { inlineData: { data: base64Data, mimeType: mimeType } },
-          { text: ANALYSIS_PROMPT }
-        ]
-      },
-      config: {
-        thinkingConfig: { thinkingLevel: ThinkingLevel.HIGH },
-        responseMimeType: "application/json",
-        responseSchema: {
-          type: Type.OBJECT,
-          properties: {
-            summary: {
-              type: Type.OBJECT,
+    const viteKey = (import.meta as any).env?.VITE_GEMINI_API_KEY;
+    if (viteKey) return viteKey;
+  } catch (e) {}
+
+  // 2. Try window-injected config (if any)
+  try {
+    const winKey = (window as any).VITE_GEMINI_API_KEY;
+    if (winKey) return winKey;
+  } catch (e) {}
+
+  // 3. Fallback to process.env with strict check
+  try {
+    if (typeof process !== 'undefined' && process?.env?.GEMINI_API_KEY) {
+      return process.env.GEMINI_API_KEY;
+    }
+  } catch (e) {}
+
+  return null;
+};
+
+// Log startup status
+console.log("LegalEase Decoder Service: Initialized. Key present:", !!getApiKey());
+
+export const analyzeLegalDocument = async (base64Data: string, mimeType: string): Promise<AnalysisResult> => {
+  const apiKey = getApiKey();
+  if (!apiKey) {
+    throw new Error("Gemini API Key is missing. Please create a .env.local file in your project root and add: VITE_GEMINI_API_KEY=your_key_here");
+  }
+  
+  const genAI = new GoogleGenerativeAI(apiKey);
+  const model = genAI.getGenerativeModel({ 
+    model: "gemini-2.5-flash", // <-- UPDATED HERE
+    generationConfig: {
+      responseMimeType: "application/json",
+      responseSchema: {
+        type: SchemaType.OBJECT,
+        properties: {
+          summary: {
+            type: SchemaType.OBJECT,
+            properties: {
+              en: { type: SchemaType.STRING },
+              hi: { type: SchemaType.STRING }
+            },
+            required: ['en', 'hi']
+          },
+          complexityScore: { type: SchemaType.NUMBER },
+          persona: { type: SchemaType.STRING },
+          verdict: { type: SchemaType.STRING },
+          risks: {
+            type: SchemaType.ARRAY,
+            items: {
+              type: SchemaType.OBJECT,
               properties: {
-                en: { type: Type.STRING },
-                hi: { type: Type.STRING }
+                category: { type: SchemaType.STRING },
+                description: { type: SchemaType.STRING },
+                severity: { type: SchemaType.STRING },
+                clause: { type: SchemaType.STRING },
+                whyRisky: { type: SchemaType.STRING },
+                recommendation: { type: SchemaType.STRING },
+                alternativeClause: { type: SchemaType.STRING }
               },
-              required: ['en', 'hi']
-            },
-            complexityScore: { type: Type.NUMBER },
-            persona: { type: Type.STRING },
-            verdict: { type: Type.STRING, enum: ['Safe', 'Caution', 'Dangerous'] },
-            risks: {
-              type: Type.ARRAY,
-              items: {
-                type: Type.OBJECT,
-                properties: {
-                  category: { type: Type.STRING },
-                  description: { type: Type.STRING },
-                  severity: { type: Type.STRING, enum: ['Low', 'Medium', 'High'] },
-                  clause: { type: Type.STRING },
-                  whyRisky: { type: Type.STRING },
-                  recommendation: { type: Type.STRING },
-                  alternativeClause: { type: Type.STRING }
-                },
-                required: ['category', 'description', 'severity', 'clause', 'whyRisky', 'recommendation']
-              }
-            },
-            clauseCards: {
-              type: Type.ARRAY,
-              items: {
-                type: Type.OBJECT,
-                properties: {
-                  title: { type: Type.STRING },
-                  summary: { type: Type.STRING },
-                  icon: { type: Type.STRING }
-                },
-                required: ['title', 'summary', 'icon']
-              }
-            },
-            hiddenFees: {
-              type: Type.ARRAY,
-              items: {
-                type: Type.OBJECT,
-                properties: {
-                  item: { type: Type.STRING },
-                  description: { type: Type.STRING },
-                  estimatedCost: { type: Type.STRING }
-                },
-                required: ['item', 'description']
-              }
-            },
-            jargonTranslator: {
-              type: Type.ARRAY,
-              items: {
-                type: Type.OBJECT,
-                properties: {
-                  term: { type: Type.STRING },
-                  plainEnglish: { type: Type.STRING }
-                },
-                required: ['term', 'plainEnglish']
-              }
+              required: ['category', 'description', 'severity', 'clause', 'whyRisky', 'recommendation']
             }
           },
-          required: ['summary', 'complexityScore', 'persona', 'verdict', 'risks', 'clauseCards', 'hiddenFees', 'jargonTranslator']
-        }
+          clauseCards: {
+            type: SchemaType.ARRAY,
+            items: {
+              type: SchemaType.OBJECT,
+              properties: {
+                title: { type: SchemaType.STRING },
+                summary: { type: SchemaType.STRING },
+                icon: { type: SchemaType.STRING }
+              },
+              required: ['title', 'summary', 'icon']
+            }
+          },
+          hiddenFees: {
+            type: SchemaType.ARRAY,
+            items: {
+              type: SchemaType.OBJECT,
+              properties: {
+                item: { type: SchemaType.STRING },
+                description: { type: SchemaType.STRING },
+                estimatedCost: { type: SchemaType.STRING }
+              },
+              required: ['item', 'description']
+            }
+          },
+          jargonTranslator: {
+            type: SchemaType.ARRAY,
+            items: {
+              type: SchemaType.OBJECT,
+              properties: {
+                term: { type: SchemaType.STRING },
+                plainEnglish: { type: SchemaType.STRING }
+              },
+              required: ['term', 'plainEnglish']
+            }
+          }
+        },
+        required: ['summary', 'complexityScore', 'persona', 'verdict', 'risks', 'clauseCards', 'hiddenFees', 'jargonTranslator']
       }
-    });
-
-    const text = response.text;
+    }
+  });
+  
+  try {
+    const result = await model.generateContent([
+      { inlineData: { data: base64Data, mimeType: mimeType } },
+      { text: ANALYSIS_PROMPT }
+    ]);
+    
+    const response = await result.response;
+    const text = response.text();
+    console.log("AI Raw Response:", text);
+    
     if (!text) throw new Error("AI returned empty content");
-    return JSON.parse(text) as AnalysisResult;
+    
+    try {
+      return JSON.parse(text) as AnalysisResult;
+    } catch (parseError) {
+      console.error("JSON Parse Error. Text was:", text);
+      throw new Error("AI returned invalid data format. Please try again.");
+    }
   } catch (error) {
     console.error("Deep Analysis failed:", error);
     throw error;
@@ -123,69 +160,91 @@ export const analyzeLegalDocument = async (base64Data: string, mimeType: string)
 };
 
 export const compareDocuments = async (file1: { data: string, mime: string, name: string }, file2: { data: string, mime: string, name: string }): Promise<ComparisonResult> => {
-  const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+  const apiKey = getApiKey();
+  if (!apiKey) throw new Error("Gemini API Key is missing.");
+  
+  const genAI = new GoogleGenerativeAI(apiKey);
+  const model = genAI.getGenerativeModel({ 
+    model: "gemini-2.5-flash", // <-- UPDATED HERE
+    generationConfig: {
+      responseMimeType: "application/json",
+      responseSchema: {
+        type: SchemaType.OBJECT,
+        properties: {
+          summary: { type: SchemaType.STRING },
+          changes: {
+            type: SchemaType.ARRAY,
+            items: {
+              type: SchemaType.OBJECT,
+              properties: {
+                type: { type: SchemaType.STRING },
+                description: { type: SchemaType.STRING },
+                impact: { type: SchemaType.STRING },
+                originalText: { type: SchemaType.STRING },
+                newText: { type: SchemaType.STRING }
+              },
+              required: ['type', 'description', 'impact']
+            }
+          },
+          riskShift: { type: SchemaType.STRING }
+        },
+        required: ['summary', 'changes', 'riskShift']
+      }
+    }
+  });
   
   try {
-    const response = await ai.models.generateContent({
-      model: "gemini-3.1-pro-preview",
-      contents: {
-        parts: [
-          { text: `Document A (${file1.name}):` },
-          { inlineData: { data: file1.data, mimeType: file1.mime } },
-          { text: `Document B (${file2.name}):` },
-          { inlineData: { data: file2.data, mimeType: file2.mime } },
-          { text: COMPARISON_PROMPT }
-        ]
-      },
-      config: {
-        responseMimeType: "application/json",
-        responseSchema: {
-          type: Type.OBJECT,
-          properties: {
-            summary: { type: Type.STRING },
-            changes: {
-              type: Type.ARRAY,
-              items: {
-                type: Type.OBJECT,
-                properties: {
-                  type: { type: Type.STRING, enum: ['Added', 'Removed', 'Modified'] },
-                  description: { type: Type.STRING },
-                  impact: { type: Type.STRING, enum: ['Positive', 'Negative', 'Neutral'] },
-                  originalText: { type: Type.STRING },
-                  newText: { type: Type.STRING }
-                },
-                required: ['type', 'description', 'impact']
-              }
-            },
-            riskShift: { type: Type.STRING }
-          },
-          required: ['summary', 'changes', 'riskShift']
-        }
-      }
-    });
-
-    const text = response.text;
+    const result = await model.generateContent([
+      { text: `Document A (${file1.name}):` },
+      { inlineData: { data: file1.data, mimeType: file1.mime } },
+      { text: `Document B (${file2.name}):` },
+      { inlineData: { data: file2.data, mimeType: file2.mime } },
+      { text: COMPARISON_PROMPT }
+    ]);
+    
+    const response = await result.response;
+    const text = response.text();
+    console.log("Comparison Raw Response:", text);
+    
     if (!text) throw new Error("Comparison returned empty content");
-    const result = JSON.parse(text);
-    return { ...result, baselineName: file1.name, comparisonName: file2.name } as ComparisonResult;
+    
+    try {
+      const parsed = JSON.parse(text);
+      return { ...parsed, baselineName: file1.name, comparisonName: file2.name } as ComparisonResult;
+    } catch (parseError) {
+      console.error("Comparison JSON Parse Error. Text was:", text);
+      throw new Error("AI returned invalid comparison data. Please try again.");
+    }
   } catch (error) {
     console.error("Comparison failed:", error);
     throw error;
   }
 };
 
-export const createChatSession = (docData: string, mimeType: string): Chat => {
-  const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
-  return ai.chats.create({
-    model: "gemini-3-flash-preview",
-    config: {
-      systemInstruction: "You are a legal assistant trained to answer questions about the provided document. Use simple language. Be concise. If the user asks about risks, identify them clearly. Always add a disclaimer that you are an AI assistant and not a lawyer.",
-    },
+export const createChatSession = (docData: string, mimeType: string) => {
+  const apiKey = getApiKey();
+  if (!apiKey) throw new Error("Gemini API Key is missing.");
+  
+  const genAI = new GoogleGenerativeAI(apiKey);
+  const model = genAI.getGenerativeModel({ 
+    model: "gemini-2.5-flash", // <-- UPDATED HERE
+    systemInstruction: "You are a legal assistant trained to answer questions about the provided document. Use simple language. Be concise. If the user asks about risks, identify them clearly. Always add a disclaimer that you are an AI assistant and not a lawyer."
+  });
+  
+  return model.startChat({
     history: [
       {
         role: "user",
-        parts: [{ inlineData: { data: docData, mimeType: mimeType } }, { text: "Please read this document and prepare to answer my questions." }]
+        parts: [
+          { inlineData: { data: docData, mimeType: mimeType } },
+          { text: "Please read this document and prepare to answer my questions." }
+        ]
+      },
+      {
+        role: "model",
+        parts: [{ text: "Understood. I have reviewed the document and am ready to answer any questions you have about it." }]
       }
     ]
   });
 };
+

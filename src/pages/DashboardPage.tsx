@@ -59,6 +59,12 @@ export const DashboardPage: React.FC = () => {
   }, [history]);
 
   useEffect(() => {
+    console.log("🚀 LegalEase App Started");
+    console.log("Current Mode:", mode);
+    console.log("Files ready:", { file1: !!file1, file2: !!file2 });
+  }, []);
+
+  useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [chatMessages]);
 
@@ -72,7 +78,11 @@ export const DashboardPage: React.FC = () => {
   };
 
   const handleAction = async () => {
-    if (!file1) return;
+    console.log("handleAction called. Mode:", mode, "File1:", !!file1, "File2:", !!file2);
+    if (!file1) {
+      console.warn("handleAction aborted: No file selected.");
+      return;
+    }
     setAnalyzing(true);
     setError(null);
     setResult(null);
@@ -80,9 +90,14 @@ export const DashboardPage: React.FC = () => {
 
     try {
       const b64_1 = await convertToBase64(file1);
+      console.log("File 1 size:", b64_1.length);
       
       if (mode === 'Analysis') {
         const data = await analyzeLegalDocument(b64_1, file1.type);
+        console.log("Analysis Result received:", data);
+        if (!data || !data.summary) {
+          throw new Error("Received invalid analysis from AI.");
+        }
         setResult(data);
         const session = createChatSession(b64_1, file1.type);
         setChatSession(session);
@@ -114,7 +129,12 @@ export const DashboardPage: React.FC = () => {
         setHistory(prev => [newHistoryItem, ...prev]);
       }
     } catch (err: any) {
-      setError(err.message || 'Failed to process document.');
+      console.error("Analysis/Comparison Error:", err);
+      if (err.message?.includes('429') || err.message?.includes('RESOURCE_EXHAUSTED')) {
+        setError('API Quota Exceeded. Please wait a few seconds before trying again, or use a smaller document.');
+      } else {
+        setError(err.message || 'Failed to process document. Please check your internet connection or try a smaller file.');
+      }
     } finally {
       setAnalyzing(false);
     }
@@ -127,8 +147,9 @@ export const DashboardPage: React.FC = () => {
     setChatMessages(prev => [...prev, { role: 'user', text: msg }]);
     setIsChatLoading(true);
     try {
-      const resp = await chatSession.sendMessage({ message: msg });
-      setChatMessages(prev => [...prev, { role: 'model', text: resp.text }]);
+      const result = await chatSession.sendMessage(msg);
+      const response = await result.response;
+      setChatMessages(prev => [...prev, { role: 'model', text: response.text() }]);
     } catch (e) {
       setChatMessages(prev => [...prev, { role: 'model', text: "Error communicating with AI assistant." }]);
     } finally {
@@ -378,6 +399,20 @@ export const DashboardPage: React.FC = () => {
               )}
             </div>
 
+            {error && (
+              <motion.div 
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="w-full max-w-lg p-4 bg-rose-50 border border-rose-100 rounded-2xl flex items-center gap-3 text-rose-600 text-sm mb-6"
+              >
+                <AlertCircle className="w-5 h-5 shrink-0" />
+                <p className="flex-1 font-medium">{error}</p>
+                <button onClick={() => setError(null)} className="p-1 hover:bg-rose-100 rounded-lg">
+                  <X className="w-4 h-4" />
+                </button>
+              </motion.div>
+            )}
+
             <div className="flex flex-col items-center gap-4">
               <button 
                 disabled={!file1 || (mode === 'Comparison' && !file2)}
@@ -389,7 +424,7 @@ export const DashboardPage: React.FC = () => {
               </button>
               <p className="text-[10px] text-slate-400 italic flex items-center gap-1">
                 <ShieldCheck className="w-3 h-3" />
-                Processing powered by Gemini 3.1 Pro Long-Context Reasoning
+                Processing powered by Gemini 1.5 Flash
               </p>
             </div>
 
