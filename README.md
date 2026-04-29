@@ -38,14 +38,14 @@ Backend
 Python – Core processing logic and AI orchestration
 Cloud & AI Infrastructure
 Google Document AI – OCR and structured data extraction from PDFs
-Gemini 1.5 Pro – Advanced large-context semantic analysis
+Gemini 2.5 Pro – Advanced large-context semantic analysis
 Firebase Storage – Secure and scalable document storage
 
 
 🔮 Future Scope
 🌐 Multi-Language Support
 
-Expand accessibility by supporting regional Indian languages such as Hindi, Bengali, and more.
+Expand accessibility by supporting regional Indian languages such as Bengali, and more.
 
 
 🔄 Smart Contract Comparison
