@@ -1,5 +1,6 @@
 📄 Legal-Ease Decoder
 
+live-link:https://rahulkumarchauhan1204.github.io/legalease-decoder/
 Empowering individuals by demystifying complex legal jargon through AI
 
 Legal-Ease Decoder is an AI-powered application designed to make legal documents understandable for everyone. Legal contracts are often filled with dense, technical language that can obscure critical details, including hidden fees or unfair clauses. This tool allows users to upload documents (such as rental agreements, employment contracts, or terms of service) and receive a clear, structured, and human-readable breakdown of key insights and risks.
